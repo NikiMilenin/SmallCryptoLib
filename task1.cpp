@@ -1,7 +1,7 @@
 #include <fstream>
-#include "misc.h"
-#include "YAFC.h"
-#include "modes.h"
+#include "misc.hpp"
+#include "YAFC.hpp"
+#include "modes.hpp"
 
 
 int main()
@@ -14,15 +14,15 @@ int main()
 
     padding_modes_t padding_mode = ISO_IEC_7816;
 
-    ECB<YetAnotherFeistelCipher> cipher;
-    cipher.encryption(&input, &output, key, padding_mode);
+    OFB<YetAnotherFeistelCipher> cipher;
+    cipher.encryption(&input, &output, key, iv, padding_mode);
 
     input.close();
     output.close();
     input.open("encrypted.txt", std::ios::binary);
     output.open("decrypted.txt", std::ios::binary);
 
-    cipher.decryption(&input, &output, key, padding_mode);
+    cipher.decryption(&input, &output, key, iv, padding_mode);
 
     return 0;
 }

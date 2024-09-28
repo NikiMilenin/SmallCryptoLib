@@ -1,4 +1,4 @@
-#include "misc.h"
+#include "misc.hpp"
 
 
 uint64_t random_64bit_message()

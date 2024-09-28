@@ -3,8 +3,8 @@
 
 
 #include <iostream>
-#include "misc.h"
-#include "block_cipher.h"
+#include "misc.hpp"
+#include "block_cipher.hpp"
 
 
 #define NUM_OF_ROUNDS 8

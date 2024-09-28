@@ -1,4 +1,4 @@
-#include "YAFC.h"
+#include "YAFC.hpp"
 
 uint16_t YetAnotherFeistelCipher::F(uint16_t word, uint16_t b)
 {

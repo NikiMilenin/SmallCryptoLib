@@ -5,9 +5,9 @@
 #include <fstream>
 #include <cstring>
 #include <stdint.h>
-#include <block_cipher.h>
-#include <YAFC.h>
-#include <paddings.h>
+#include <block_cipher.hpp>
+#include <YAFC.hpp>
+#include <paddings.hpp>
 
 
 template<class Cipher> class Mode
@@ -178,9 +178,9 @@ public:
         uint64_t decrypt_block = iv;
 
         while (true) {
-            this->alghoritm.block_encrypt(&decrypt_block, key);
             char bytes_read = this->get_block(input, buffer, NO_PADDING);
             if (bytes_read == 0 ) break;
+            this->alghoritm.block_encrypt(&decrypt_block, key);
             uint64_t block = 0;
             memcpy(&block, buffer, 8);
             block = block ^ decrypt_block;
@@ -209,11 +209,7 @@ public:
         while (true) {
             char bytes_read = this->get_block(input, buffer, padding_mode);
             if (bytes_read == 0 ) break;
-            this->alghoritm.block_encrypt(&prev_block, key);
-            uint64_t block = 0;
-            memcpy(&block, buffer, 8);
-            block = block ^ prev_block;
-            memcpy(buffer, &block, 8);
+            this->OFB_mode_policy(buffer, prev_block, key);
             this->procede_block(output, buffer, NO_PADDING);
             if (bytes_read < this->block_len) break;
         }
@@ -224,16 +220,21 @@ public:
         char buffer[this->block_len];
         uint64_t decrypt_block = iv;
         while (true) {
-            this->alghoritm.block_encrypt(&decrypt_block, key);
             char bytes_read = this->get_block(input, buffer, NO_PADDING);
             if (bytes_read == 0 ) break;
-            uint64_t block = 0;
-            memcpy(&block, buffer, 8);
-            block = block ^ decrypt_block;
-            memcpy(buffer, &block, 8);
+            this->OFB_mode_policy(buffer, decrypt_block, key);
             this->procede_block(output, buffer, padding_mode);
             if (bytes_read < this->block_len) break;
         }
+    }
+private:
+    void OFB_mode_policy(char* buffer, uint64_t cryptoblock, uint64_t key)
+    {
+        this->alghoritm.block_encrypt(&cryptoblock, key);
+        uint64_t block = 0;
+        memcpy(&block, buffer, 8);
+        block = block ^ cryptoblock;
+        memcpy(buffer, &block, 8);
     }
 };
 
@@ -254,12 +255,7 @@ public:
         while (true) {
             char bytes_read = this->get_block(input, buffer, padding_mode);
             if (bytes_read == 0 ) break;
-            uint64_t enc_block = counter++;
-            this->alghoritm.block_encrypt(&enc_block, key);
-            uint64_t block = 0;
-            memcpy(&block, buffer, 8);
-            block = block ^ enc_block;
-            memcpy(buffer, &block, 8);
+            this->CTR_mode_policy(buffer, key, counter++);
             this->procede_block(output, buffer, NO_PADDING);
             if (bytes_read < this->block_len) break;
         }
@@ -272,17 +268,20 @@ public:
         while (true) {
             char bytes_read = this->get_block(input, buffer, NO_PADDING);
             if (bytes_read == 0 ) break;
-            uint64_t enc_block = counter++;
-            this->alghoritm.block_encrypt(&enc_block, key);
-            (*input).read(buffer, this->block_len);
-            std::streamsize bytesRead = (*input).gcount();
-            uint64_t block = 0;
-            memcpy(&block, buffer, 8);
-            block = block ^ enc_block;
-            memcpy(buffer, &block, 8);
+            this->CTR_mode_policy(buffer, key, counter++);
             this->procede_block(output, buffer, padding_mode);
             if (bytes_read < this->block_len) break;
         }
+    }
+private:
+    void CTR_mode_policy(char* buffer, uint64_t key, uint64_t counter)
+    {
+        uint64_t enc_block = counter;
+        this->alghoritm.block_encrypt(&enc_block, key);
+        uint64_t block = 0;
+        memcpy(&block, buffer, 8);
+        block = block ^ enc_block;
+        memcpy(buffer, &block, 8);
     }
 };
 #endif
