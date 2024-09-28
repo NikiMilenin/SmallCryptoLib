@@ -1,14 +1,14 @@
 #include "paddings.h"
 
 
-int add_asnxi_x9_23_padding(char* buffer, int len, int bytes_read)
+char add_asnxi_x9_23_padding(char* buffer, char len, char bytes_read)
 {
     buffer[len - 1] = len - bytes_read;
     return 0;
 }
 
 
-int get_asnxi_x9_23_padding_len(char* buffer, int len)
+char get_asnxi_x9_23_padding_len(char* buffer, char len)
 {
     int del = 0;
     if (buffer[len - 2] == '\000')
@@ -23,7 +23,7 @@ int get_asnxi_x9_23_padding_len(char* buffer, int len)
 }
 
 
-int add_iso_iec_7816_padding(char* buffer, int len, int bytes_read)
+char add_iso_iec_7816_padding(char* buffer, char len, char bytes_read)
 {
     buffer[bytes_read] = 0x80;
     for (int i = bytes_read + 1; i < len; i++)
@@ -34,7 +34,7 @@ int add_iso_iec_7816_padding(char* buffer, int len, int bytes_read)
 }
 
 
-int get_iso_iec_7816_padding_len(char* buffer, int len)
+char get_iso_iec_7816_padding_len(char* buffer, char len)
 {
     for (int i = len - 1; i > 0; i--)
     {
